@@ -1,5 +1,6 @@
 import Foundation
 import CoreAudio
+import IOBluetooth
 
 // Fallback for the Bluetooth transport constant if not exposed by the SDK headers.
 #if !canImport(AudioToolbox)
@@ -13,8 +14,8 @@ private let kBluetoothTransportFallback: UInt32 = 0x62746C20 // 'btl '
 private func bluetoothTransportConstant() -> UInt32 {
     #if canImport(AudioToolbox)
     // Prefer the SDK constant when available; otherwise, use fallback.
-    return (UInt32(bitPattern: Int32(kAudioDeviceTransportType_Bluetooth)))
-    #else
+//    return (UInt32(bitPattern: Int32(kAudioDeviceTransportType_Bluetooth)))
+//    #else
     return kBluetoothTransportFallback
     #endif
 }
@@ -40,28 +41,53 @@ private func defaultOutputDeviceID() -> AudioObjectID {
     return (status == noErr) ? defaultDeviceID : AudioObjectID(bitPattern: 0)
 }
 
-/// Determines whether the current default output device uses Bluetooth transport.
+/// Determines whether the current default output device is the given Bluetooth device.
 @inline(__always)
-func isDefaultOutputBluetooth() -> Bool {
-    let deviceID = defaultOutputDeviceID()
-    if deviceID == AudioObjectID(bitPattern: 0) { return false }
+func isDefaultOutput(for device: IOBluetoothDevice) -> Bool {
+    let defaultID = defaultOutputDeviceID()
+    if defaultID == AudioObjectID(bitPattern: 0) { return false }
 
+    // Ensure transport is Bluetooth
     var transportType: UInt32 = 0
-    var propertyAddress = AudioObjectPropertyAddress(
+    var transportAddress = AudioObjectPropertyAddress(
         mSelector: kAudioDevicePropertyTransportType,
         mScope: kAudioObjectPropertyScopeGlobal,
         mElement: kAudioObjectPropertyElementMain
     )
-    var dataSize = UInt32(MemoryLayout<UInt32>.size)
-    let status = AudioObjectGetPropertyData(
-        deviceID,
-        &propertyAddress,
+    var transportSize = UInt32(MemoryLayout<UInt32>.size)
+    let transportStatus = AudioObjectGetPropertyData(
+        defaultID,
+        &transportAddress,
         0,
         nil,
-        &dataSize,
+        &transportSize,
         &transportType
     )
-    if status != noErr { return false }
+    if transportStatus != noErr || transportType != bluetoothTransportConstant() { return false }
 
-    return transportType == bluetoothTransportConstant()
+    // Compare the CoreAudio device name to the Bluetooth device name as a pragmatic heuristic.
+    var nameAddress = AudioObjectPropertyAddress(
+        mSelector: kAudioObjectPropertyName,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain
+    )
+    var cfName: CFString = "" as CFString
+    var nameSize = UInt32(MemoryLayout<CFString>.size)
+    let nameStatus = AudioObjectGetPropertyData(
+        defaultID,
+        &nameAddress,
+        0,
+        nil,
+        &nameSize,
+        &cfName
+    )
+    if nameStatus != noErr { return false }
+
+    let audioName = cfName as String
+    let btName = device.name ?? device.addressString ?? ""
+
+    if audioName.caseInsensitiveCompare(btName) == .orderedSame { return true }
+    if audioName.lowercased().hasPrefix(btName.lowercased()) { return true }
+
+    return false
 }

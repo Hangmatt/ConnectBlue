@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		7BED6B172E7D6E110059D09D /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BED6B162E7D6E110059D09D /* IOBluetooth.framework */; };
+		7BED6B192E7D6E220059D09D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BED6B182E7D6E220059D09D /* CoreAudio.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		7BED6B092E7D6CB40059D09D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -20,6 +25,8 @@
 
 /* Begin PBXFileReference section */
 		7BED6B0B2E7D6CB40059D09D /* ConnectBlue */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ConnectBlue; sourceTree = BUILT_PRODUCTS_DIR; };
+		7BED6B162E7D6E110059D09D /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = System/Library/Frameworks/IOBluetooth.framework; sourceTree = SDKROOT; };
+		7BED6B182E7D6E220059D09D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -35,6 +42,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7BED6B192E7D6E220059D09D /* CoreAudio.framework in Frameworks */,
+				7BED6B172E7D6E110059D09D /* IOBluetooth.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -45,6 +54,7 @@
 			isa = PBXGroup;
 			children = (
 				7BED6B0D2E7D6CB40059D09D /* ConnectBlue */,
+				7BED6B152E7D6E110059D09D /* Frameworks */,
 				7BED6B0C2E7D6CB40059D09D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -55,6 +65,15 @@
 				7BED6B0B2E7D6CB40059D09D /* ConnectBlue */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		7BED6B152E7D6E110059D09D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7BED6B182E7D6E220059D09D /* CoreAudio.framework */,
+				7BED6B162E7D6E110059D09D /* IOBluetooth.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
