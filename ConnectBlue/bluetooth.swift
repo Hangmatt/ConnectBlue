@@ -27,10 +27,19 @@ func connectBluetoothDevice(addressString: String, timeout: TimeInterval = 20, p
     guard let device = IOBluetoothDevice(addressString: addressString) else {
         return (nil, false)
     }
+    // If already connected and audio output is already routed to a Bluetooth device, exit successfully.
+    if device.isConnected() && isDefaultOutput(for: device) {
+        print("[Bluetooth] Device \(device.name ?? device.addressString ?? "<unknown>") is already connected and set as default audio output. Skipping connect.")
+        return (device, true)
+    }
     let result = device.openConnection()
+    print("[Bluetooth] Open connection returned: \(result)")
     if result != kIOReturnSuccess {
+        print("[Bluetooth] Failed to open connection to \(device.name ?? device.addressString ?? "<unknown>") with status \(result)")
         return (device, false)
     }
     let connected = waitForBluetoothConnection(device: device, timeout: timeout, pollInterval: pollInterval)
+    print("[Bluetooth] Wait-for-connection result for \(device.name ?? device.addressString ?? "<unknown>"): \(connected)")
     return (device, connected)
 }
+
