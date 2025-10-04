@@ -1,0 +1,59 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildAndRun"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "19a840bda57deb6331120bf91e27f27af981748bde40018d76ed733093feb978"
+    }
+  ],
+  "containerPath" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/ConnectBlue.xcodeproj",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "arm64",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : false,
+      "hostTargetedPlatform" : null,
+      "platform" : "macosx",
+      "sdk" : "macosx26.4",
+      "sdkVariant" : "macos",
+      "supportedArchitectures" : [
+        "arm64e",
+        "arm64",
+        "x86_64"
+      ],
+      "targetArchitecture" : "arm64"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Products",
+      "derivedDataPath" : "/Users/matthijs/Library/Developer/Xcode/DerivedData",
+      "indexDataStoreFolderPath" : "/Users/matthijs/Library/Developer/Xcode/DerivedData/ConnectBlue-gzmohxaxulvmlietwdmznjbqnxnc/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/matthijs/Library/Developer/Xcode/DerivedData/ConnectBlue-gzmohxaxulvmlietwdmznjbqnxnc/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Debug",
+    "overrides" : {
+      "synthesized" : {
+        "table" : {
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/ConnectBlue-primary.dia",
+    "emit-module-dependencies" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/ConnectBlue-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/ConnectBlue-primary-emit-module.dia",
+    "pch" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/ConnectBlue-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/ConnectBlue-primary.swiftdeps"
+  },
+  "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/ConnectBlue/main.swift" : {
+    "const-values" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main.swiftconstvalues",
+    "dependencies" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main.d",
+    "diagnostics" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main.dia",
+    "index-unit-output-path" : "/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main.o",
+    "llvm-bc" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main.bc",
+    "object" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main.o",
+    "swift-dependencies" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main.swiftdeps",
+    "swiftmodule" : "/Users/matthijs/Developer/MacOS/Xcode/ConnectBlue/Build/Intermediates.noindex/ConnectBlue.build/Debug/ConnectBlue.build/Objects-normal/arm64/main~partial.swiftmodule"
+  }
+}

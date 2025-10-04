@@ -22,6 +22,7 @@ When you have a favorite Bluetooth headset or speaker, macOS doesn’t always re
 - Xcode (recommended) to build and run
 - Bluetooth permission granted to the app (System Settings → Privacy & Security → Bluetooth)
 
+
 ## Permissions and notes
 - On first run, macOS may prompt you to allow Bluetooth access for the app/binary. You must allow it for connections to work.
 - If you package this as a sandboxed app, ensure the proper Bluetooth entitlements/usage descriptions.
