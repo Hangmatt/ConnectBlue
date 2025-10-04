@@ -24,6 +24,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		7B8E6D4A2E9123FF001DE0EB /* README.md */ = {isa = PBXFileReference; explicitFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		7BED6B0B2E7D6CB40059D09D /* ConnectBlue */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ConnectBlue; sourceTree = BUILT_PRODUCTS_DIR; };
 		7BED6B162E7D6E110059D09D /* IOBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOBluetooth.framework; path = System/Library/Frameworks/IOBluetooth.framework; sourceTree = SDKROOT; };
 		7BED6B182E7D6E220059D09D /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
@@ -56,6 +57,7 @@
 				7BED6B0D2E7D6CB40059D09D /* ConnectBlue */,
 				7BED6B152E7D6E110059D09D /* Frameworks */,
 				7BED6B0C2E7D6CB40059D09D /* Products */,
+				7B8E6D4A2E9123FF001DE0EB /* README.md */,
 			);
 			sourceTree = "<group>";
 		};
