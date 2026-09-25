@@ -11,6 +11,52 @@ func sleepSeconds(_ seconds: TimeInterval) {
     usleep(interval)
 }
 
+/// Appends a timestamped success/failure result and CLI options log entry to ~/Library/Logs/connectBlue.log.
+func logExecutionResult(success: Bool, message: String, options: CLIOptions) {
+    let logPath = NSString(string: "~/Library/Logs/connectBlue.log").expandingTildeInPath
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+    let timestamp = formatter.string(from: Date())
+
+    let statusString = success ? "SUCCESS" : "FAILURE"
+    let logLine = "[\(timestamp)] STATUS: \(statusString) | Message: \(message) | MAC: \(options.macAddress) | Host: \(options.deviceName) | Output: \(options.outputName)\n"
+
+    let fileManager = FileManager.default
+    let logDir = (logPath as NSString).deletingLastPathComponent
+    try? fileManager.createDirectory(atPath: logDir, withIntermediateDirectories: true, attributes: nil)
+
+    if let fileHandle = FileHandle(forWritingAtPath: logPath) {
+        fileHandle.seekToEndOfFile()
+        if let data = logLine.data(using: .utf8) {
+            fileHandle.write(data)
+        }
+        fileHandle.closeFile()
+    } else {
+        try? logLine.write(toFile: logPath, atomically: true, encoding: .utf8)
+    }
+}
+
+/// Checks if the target Bluetooth device is available (exists and is paired/known) before attempting connection.
+/// - Returns: Tuple containing optional device, availability boolean, and descriptive message.
+func checkDeviceAvailability(addressString: String, nameString: String) -> (device: IOBluetoothDevice?, available: Bool, reason: String) {
+    guard let device = IOBluetoothDevice(addressString: addressString) else {
+        return (nil, false, "Invalid MAC address or Bluetooth device creation failed for \(addressString)")
+    }
+
+    // Check paired device list or device status
+    let pairedDevices = (IOBluetoothDevice.pairedDevices() as? [IOBluetoothDevice]) ?? []
+    let isPaired = device.isPaired() || pairedDevices.contains(where: {
+        ($0.addressString?.caseInsensitiveCompare(addressString) == .orderedSame) ||
+        ($0.name?.caseInsensitiveCompare(nameString) == .orderedSame)
+    })
+
+    if !isPaired && !device.isConnected() {
+        return (device, false, "Device '\(nameString)' (\(addressString)) is not paired or registered in system Bluetooth")
+    }
+
+    return (device, true, "Device is available")
+}
+
 /// Poll until the Bluetooth device reports connected (or until timeout)
 /// - Returns: true if connected within timeout, false otherwise
 func waitForBluetoothConnection(device: IOBluetoothDevice, timeout: TimeInterval = 15, pollInterval: TimeInterval = 0.5) -> Bool {
@@ -27,26 +73,22 @@ func waitForBluetoothConnection(device: IOBluetoothDevice, timeout: TimeInterval
 /// Attempts to open a connection to a device at the given address and waits until connected or timeout.
 /// - Returns: the device if found, and a Bool indicating if it became connected.
 @discardableResult
-func connectBluetoothDevice(addressString: String, timeout: TimeInterval = 20, pollInterval: TimeInterval = 0.5) -> (device: IOBluetoothDevice?, connected: Bool) {
-    guard let device = IOBluetoothDevice(addressString: addressString) else {
-        return (nil, false)
-    }
+func connectBluetoothDevice(device: IOBluetoothDevice, timeout: TimeInterval = 20, pollInterval: TimeInterval = 0.5) -> Bool {
     // If already connected and audio output is already routed to a Bluetooth device, exit successfully.
     if device.isConnected() && isDefaultOutput(for: device) {
         print("[Bluetooth] Device \(device.name ?? device.addressString ?? "<unknown>") is already connected and set as default audio output. Skipping connect.")
-        return (device, true)
+        return true
     }
     let result = device.openConnection()
     print("[Bluetooth] Open connection returned: \(result)")
     if result != kIOReturnSuccess {
         print("[Bluetooth] Failed to open connection to \(device.name ?? device.addressString ?? "<unknown>") with status \(result)")
-        return (device, false)
+        return false
     }
     let connected = waitForBluetoothConnection(device: device, timeout: timeout, pollInterval: pollInterval)
     print("[Bluetooth] Wait-for-connection result for \(device.name ?? device.addressString ?? "<unknown>"): \(connected)")
-    return (device, connected)
+    return connected
 }
-
 
 /// Returns the CoreAudio transport type constant value for Bluetooth devices.
 /// Falls back to the four-character code 'blut' when the SDK constant is unavailable.
@@ -82,9 +124,33 @@ private func defaultOutputDeviceID() -> AudioObjectID {
     return (status == noErr) ? defaultDeviceID : AudioObjectID(bitPattern: 0)
 }
 
+/// Returns the display name of the current system default audio output device.
+func currentDefaultOutputDeviceName() -> String {
+    let defaultID = defaultOutputDeviceID()
+    if defaultID == AudioObjectID(bitPattern: 0) { return "<None>" }
+
+    var nameAddress = AudioObjectPropertyAddress(
+        mSelector: kAudioObjectPropertyName,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain
+    )
+    var unmanagedName: Unmanaged<CFString>?
+    var nameSize = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+    let status = AudioObjectGetPropertyData(
+        defaultID,
+        &nameAddress,
+        0,
+        nil,
+        &nameSize,
+        &unmanagedName
+    )
+    if status == noErr, let cfName = unmanagedName?.takeRetainedValue() {
+        return cfName as String
+    }
+    return "<Unknown>"
+}
+
 /// Determines whether the current default output device corresponds to the specified Bluetooth device.
-/// This checks that the current default device's transport type is Bluetooth and compares the device name
-/// as a pragmatic heuristic.
 /// - Parameter device: The Bluetooth device to compare against the current default audio output.
 /// - Returns: `true` if the default output appears to be the provided Bluetooth device; otherwise `false`.
 @inline(__always)
@@ -214,16 +280,51 @@ func setDefaultOutput(named outputName: String) {
     print("Audio device \(outputName) not found")
 }
 
-/// Parses command-line arguments for device MAC address and display name.
-/// Supports flags (--address/-a, --name/-n) or positional arguments in order: <MAC> <Name>.
-/// - Parameters:
-///   - defaultAddress: The default Bluetooth MAC address to use when not provided.
-///   - defaultName: The default display name to use when not provided.
-/// - Returns: A tuple containing the resolved address and name.
-func parseArgs(defaultAddress: String, defaultName: String) -> (address: String, name: String) {
-    var address = defaultAddress
-    var name = defaultName
-    var addressSet = false
+/// Parsed CLI arguments and options.
+struct CLIOptions {
+    var macAddress: String
+    var deviceName: String
+    var outputName: String
+    var writeSettings: Bool = false
+    var showSettings: Bool = false
+    var printHelp: Bool = false
+}
+
+/// Prints CLI usage and available flag options.
+func printHelpMessage() {
+    let tool = (CommandLine.arguments.first as NSString?)?.lastPathComponent ?? "ConnectBlue"
+    print("""
+    ConnectBlue - Quick Bluetooth Device & Audio Routing Utility
+
+    Usage:
+      \(tool) [options] [MAC_ADDRESS] [DEVICE_NAME] [OUTPUT_NAME]
+
+    Options:
+      -m <mac>      Bluetooth MAC address (e.g. -m 88:C9:E8:F4:23:32)
+      -d <name>     Bluetooth device / host display name (e.g. -d "Headphones")
+      -o <output>   Audio output device name (defaults to --device / --mac)
+      -w            Write / save specified options as persistent defaults to ~/Library/Preferences/com.hangmatt.connectblue.plist
+      --show        Print currently stored default settings
+      -h, --help    Show this help message
+
+    Examples:
+      \(tool) -m 88:C9:E8:F4:23:32 -d "Headphones"
+      \(tool) -m 88:C9:E8:F4:23:32 -d "Headphones" -w
+      \(tool) -h
+      \(tool) --show
+    """)
+}
+
+/// Parses command-line arguments for device MAC address, device name, audio output name, and write flags.
+func parseArgs() -> CLIOptions {
+    var mac = SettingsStore.macAddress
+    var name = SettingsStore.deviceName
+    var output: String? = nil
+    var write = false
+    var show = false
+    var help = false
+    
+    var macSet = false
     var nameSet = false
 
     let args = Array(CommandLine.arguments.dropFirst())
@@ -231,56 +332,122 @@ func parseArgs(defaultAddress: String, defaultName: String) -> (address: String,
     while i < args.count {
         let arg = args[i]
         switch arg {
-        case "--help", "-h":
-            let tool = (CommandLine.arguments.first as NSString?)?.lastPathComponent ?? "tool"
-            print("Usage: \(tool) [--address <MAC>] [--name <DeviceName>] or positional: <MAC> <DeviceName>")
-            print("Examples:")
-            print("  \(tool) 11:22:33:44:55:66 \"My Headphones\"")
-            print("  \(tool) --address 11:22:33:44:55:66 --name \"My Headphones\"")
-            exit(0)
-        case "--address", "-a":
-            if i + 1 < args.count { address = args[i + 1]; addressSet = true; i += 1 }
-        case "--name", "-n":
-            if i + 1 < args.count { name = args[i + 1]; nameSet = true; i += 1 }
+        case "-m", "--mac", "--address", "-a":
+            if i + 1 < args.count {
+                mac = args[i + 1]
+                macSet = true
+                i += 1
+            }
+        case "-d", "--device", "--host", "--name", "-n":
+            if i + 1 < args.count {
+                name = args[i + 1]
+                nameSet = true
+                i += 1
+            }
+        case "-o", "--output":
+            if i + 1 < args.count {
+                output = args[i + 1]
+                i += 1
+            }
+        case "-w", "--write", "--save", "-S":
+            write = true
+        case "--show":
+            show = true
+        case "-h", "--help", "help", "-?":
+            help = true
         default:
-            if !addressSet { address = arg; addressSet = true }
-            else if !nameSet { name = arg; nameSet = true }
+            if !macSet {
+                mac = arg
+                macSet = true
+            } else if !nameSet {
+                name = arg
+                nameSet = true
+            } else if output == nil {
+                output = arg
+            }
         }
         i += 1
     }
-    return (address, name)
+
+    // Output device defaults always to --device / --mac (deviceName)
+    let finalOutput = output ?? name
+    return CLIOptions(
+        macAddress: mac,
+        deviceName: name,
+        outputName: finalOutput,
+        writeSettings: write,
+        showSettings: show,
+        printHelp: help
+    )
 }
 
 /// Program entry point that attempts to connect the target Bluetooth device and set it as default output.
 func main() {
-    print("[Main] Starting Bluetooth connect flow...")
+    let options = parseArgs()
 
-    // Defaults can be overridden via CLI args.
-    let defaultDeviceAddress = "88:C9:E8:F4:23:32"
-    let defaultDeviceName = "Headphones"
-    let (deviceAddress, deviceName) = parseArgs(defaultAddress: defaultDeviceAddress, defaultName: defaultDeviceName)
-
-    print("Attempting connection to \(deviceName)...")
-    print("[Main] Target device address: \(deviceAddress)")
-
-    let (device, connected) = connectBluetoothDevice(addressString: deviceAddress, timeout: 20, pollInterval: 0.5)
-    print("[Main] connectBluetoothDevice returned connected=\(connected)")
-
-    guard let dev = device else {
-        print("Could not find device at address \(deviceAddress).")
+    if options.printHelp {
+        printHelpMessage()
         return
     }
 
+    if options.writeSettings {
+        SettingsStore.save(mac: options.macAddress, name: options.deviceName, output: options.outputName)
+        print("✓ Successfully saved CLI options to ~/Library/Preferences/com.hangmatt.connectblue.plist:")
+        print("  MAC Address   : \(options.macAddress)")
+        print("  Device Name   : \(options.deviceName)")
+        print("  Output Name   : \(options.outputName)")
+    }
+
+    if options.showSettings {
+        print("ConnectBlue Currently Saved Default Settings:")
+        print("  -m \(SettingsStore.macAddress)")
+        print("  -d \(SettingsStore.deviceName)")
+        print("  -o \(SettingsStore.outputName)")
+        return
+    }
+
+    print("[Main] Pre-connection availability check for '--device/--mac' (\(options.deviceName) / \(options.macAddress))...")
+
+    // Availability check before connecting
+    let (btDevice, isAvailable, availReason) = checkDeviceAvailability(addressString: options.macAddress, nameString: options.deviceName)
+
+    guard let dev = btDevice, isAvailable else {
+        let errorMsg = "Bluetooth device '--device/--mac' (\(options.deviceName) / \(options.macAddress)) is unavailable. Reason: \(availReason)"
+        print("✗ FAILURE: \(errorMsg)")
+        logExecutionResult(success: false, message: errorMsg, options: options)
+        return
+    }
+
+    print("[Main] Target device is available. Attempting connection to \(options.deviceName)...")
+
+    let connected = connectBluetoothDevice(device: dev, timeout: 20, pollInterval: 0.5)
+
     guard connected else {
-        print("[Main] Timed out waiting for Bluetooth connection to \(deviceName).")
+        let failMsg = "Timed out or failed to connect to Bluetooth device \(options.deviceName) (\(options.macAddress))"
+        print("✗ FAILURE: \(failMsg)")
+        logExecutionResult(success: false, message: failMsg, options: options)
         return
     }
 
     if isDefaultOutput(for: dev) {
-        print("[Main] Default output already set to \(deviceName). No switch needed.")
+        print("[Main] Default output already set to \(options.outputName). No switch needed.")
     } else {
-        print("[Main] Bluetooth connected, switching system output to \(deviceName)...")
-        setDefaultOutput(named: deviceName)
+        print("[Main] Bluetooth connected, switching system output to \(options.outputName)...")
+        setDefaultOutput(named: options.outputName)
+    }
+
+    // Verify system default output device before exiting & display success/failure message
+    let currentOutput = currentDefaultOutputDeviceName()
+    let isOutputVerified = isDefaultOutput(for: dev) || currentOutput.caseInsensitiveCompare(options.outputName) == .orderedSame
+
+    if isOutputVerified {
+        let succMsg = "Output device verified as '\(options.outputName)'"
+        print("✓ SUCCESS: \(succMsg) (\(options.macAddress)).")
+        logExecutionResult(success: true, message: succMsg, options: options)
+    } else {
+        let failMsg = "System output device is '\(currentOutput)', expected '\(options.outputName)'"
+        print("✗ FAILURE: \(failMsg) (\(options.macAddress)).")
+        logExecutionResult(success: false, message: failMsg, options: options)
     }
 }
 

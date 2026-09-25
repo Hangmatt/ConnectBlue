@@ -8,26 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		7B2360972F7BB651003BAADD /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BED6B182E7D6E220059D09D /* CoreAudio.framework */; };
-		7B2360982F7BB651003BAADD /* CoreAudio.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7BED6B182E7D6E220059D09D /* CoreAudio.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7B23609A2F7BB653003BAADD /* IOBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7BED6B162E7D6E110059D09D /* IOBluetooth.framework */; };
-		7B23609B2F7BB653003BAADD /* IOBluetooth.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7BED6B162E7D6E110059D09D /* IOBluetooth.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		7B2360A32F7BBBF6003BAADD /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B2360A22F7BBBF6003BAADD /* WidgetKit.framework */; };
 		7B2360A52F7BBBF6003BAADD /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B2360A42F7BBBF6003BAADD /* SwiftUI.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		7B2360992F7BB651003BAADD /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				7B2360982F7BB651003BAADD /* CoreAudio.framework in Embed Frameworks */,
-				7B23609B2F7BB653003BAADD /* IOBluetooth.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		7BED6B092E7D6CB40059D09D /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -154,7 +140,6 @@
 				7BED6B072E7D6CB40059D09D /* Sources */,
 				7BED6B082E7D6CB40059D09D /* Frameworks */,
 				7BED6B092E7D6CB40059D09D /* CopyFiles */,
-				7B2360992F7BB651003BAADD /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -177,6 +162,9 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
+				KnownAssetTags = (
+					New,
+				);
 				LastSwiftUpdateCheck = 2640;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
@@ -476,6 +464,15 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreAudio,
+					"-framework",
+					IOBluetooth,
+					"-framework",
+					AudioToolbox,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.hangmatt.connectblue;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -509,6 +506,15 @@
 				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
 				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 0.8;
+				OTHER_LDFLAGS = (
+					"-framework",
+					CoreAudio,
+					"-framework",
+					IOBluetooth,
+					"-framework",
+					AudioToolbox,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.hangmatt.connectblue;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
