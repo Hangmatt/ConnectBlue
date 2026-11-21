@@ -27,8 +27,8 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
             .toolbar {
                 ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    Button(action: refreshList) {
+                        Label("Refresh Devices", systemImage: "arrow.clockwise")
                     }
                 }
             }
@@ -37,7 +37,7 @@ struct ContentView: View {
         }
     }
 
-    private func addItem() {
+    private func refreshList() {
         withAnimation {
             let newItem = Item(timestamp: Date())
             modelContext.insert(newItem)

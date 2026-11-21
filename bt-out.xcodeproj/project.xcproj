@@ -14,13 +14,33 @@
     { "kind": "folder", "path": "bt-out", "target-membership": [ "bt-out" ] },
     { "kind": "folder", "path": "bt-outTests", "target-membership": [ "bt-outTests" ] },
     { "kind": "folder", "path": "bt-outUITests", "target-membership": [ "bt-outUITests" ] },
+    { "kind": "folder", "path": "bt-out-cli", "target-membership": [ "bt-out-cli" ] },
     {
+      "kind": "group",
+      "name": "Frameworks",
+      "children": [
+        {
+          "path": "<SDK>/System/Library/Frameworks/IOBluetooth.framework",
+          "target-membership": [
+            "bt-out/frameworks",
+            "bt-out-cli/frameworks",
+          ],
+        }, {
+          "path": "<SDK>/System/Library/Frameworks/CoreAudio.framework",
+          "target-membership": [
+            "bt-out/frameworks",
+            "bt-out-cli/frameworks",
+          ],
+        },
+      ],
+    }, {
       "kind": "group",
       "name": "Products",
       "children": [
         { "path": "<PRODUCTS>/bt-out.app", "id": "7B9CDCFA30B1B766000E7466", "type": "wrapper.application", "index": false },
         { "path": "<PRODUCTS>/bt-outTests.xctest", "id": "7B9CDD0930B1B767000E7466", "type": "wrapper.cfbundle", "index": false },
         { "path": "<PRODUCTS>/bt-outUITests.xctest", "id": "7B9CDD1330B1B767000E7466", "type": "wrapper.cfbundle", "index": false },
+        { "path": "<PRODUCTS>/bt-out-cli", "id": "7B9CDD3230B1C018000E7466", "type": "compiled.mach-o.executable", "index": false },
       ],
     },
   ],
@@ -36,8 +56,9 @@
         "resources",
       ],
       "build-settings": {
-        "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+        "ASSETCATALOG_COMPILER_APPICON_NAME": "bt-out_AppIcon",
         "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
+        "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "YES",
         "CODE_SIGN_STYLE": "Automatic",
         "COMBINE_HIDPI_IMAGES": "YES",
         "CURRENT_PROJECT_VERSION": "1",
@@ -47,6 +68,8 @@
         "ENABLE_PREVIEWS": "YES",
         "ENABLE_USER_SELECTED_FILES": "readonly",
         "GENERATE_INFOPLIST_FILE": "YES",
+        "INFOPLIST_KEY_CFBundleDisplayName": "BT-Out",
+        "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.utilities",
         "INFOPLIST_KEY_NSHumanReadableCopyright": "",
         "LD_RUNPATH_SEARCH_PATHS": [
           "$(inherited)",
@@ -60,6 +83,33 @@
         "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
         "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
         "SWIFT_EMIT_LOC_STRINGS": "YES",
+        "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
+        "SWIFT_VERSION": "5.0",
+      },
+    }, {
+      "name": "bt-out-cli",
+      "id": "7B9CDD3130B1C018000E7466",
+      "product": "Products/bt-out-cli",
+      "product-type": "tool",
+      "build-phases": [
+        "compile-sources",
+        "frameworks",
+        {
+          "kind": "copy",
+          "name": "Copy Files",
+          "relative-path": "/usr/share/man/man1/",
+          "scope": "install",
+        },
+      ],
+      "build-settings": {
+        "CODE_SIGN_IDENTITY[sdk=macosx*]": "-",
+        "CODE_SIGN_STYLE": "Automatic",
+        "DEVELOPMENT_TEAM": "TDAW6DUT5V",
+        "ENABLE_HARDENED_RUNTIME": "YES",
+        "MACOSX_DEPLOYMENT_TARGET": "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)",
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.hangmatt.bt-out-cli",
+        "PRODUCT_NAME": "$(TARGET_NAME)",
+        "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
         "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
         "SWIFT_VERSION": "5.0",
       },
